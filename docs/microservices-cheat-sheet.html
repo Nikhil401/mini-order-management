@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mini Order Management - Microservices Cheat Sheet</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --panel: #111827;
+      --panel-2: #1f2937;
+      --text: #e5e7eb;
+      --muted: #9ca3af;
+      --accent: #60a5fa;
+      --accent-2: #34d399;
+      --border: #334155;
+      --code: #0b1220;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Arial, sans-serif;
+      background: linear-gradient(180deg, #0b1020 0%, var(--bg) 100%);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 32px 20px 56px;
+    }
+
+    .hero {
+      background: radial-gradient(circle at top right, rgba(96, 165, 250, 0.18), transparent 32%),
+                  linear-gradient(135deg, rgba(31, 41, 55, 0.95), rgba(17, 24, 39, 0.95));
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 32px;
+      margin-bottom: 24px;
+      box-shadow: 0 20px 45px rgba(0, 0, 0, 0.25);
+    }
+
+    h1, h2, h3 {
+      margin: 0 0 12px;
+      line-height: 1.2;
+    }
+
+    h1 { font-size: 2.1rem; }
+    h2 { font-size: 1.35rem; margin-top: 0; }
+    h3 { font-size: 1.05rem; color: #f8fafc; }
+
+    p { margin: 0 0 12px; color: var(--text); }
+
+    .muted { color: var(--muted); }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+      margin: 20px 0;
+    }
+
+    .card {
+      background: rgba(17, 24, 39, 0.92);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 18px;
+    }
+
+    ul {
+      margin: 8px 0 0 20px;
+      padding: 0;
+    }
+
+    li { margin: 8px 0; }
+
+    code, pre {
+      font-family: Consolas, "Courier New", monospace;
+      font-size: 0.95rem;
+    }
+
+    pre {
+      background: var(--code);
+      border: 1px solid #1f3355;
+      border-radius: 12px;
+      padding: 14px 16px;
+      overflow-x: auto;
+      color: #dbeafe;
+      margin: 12px 0 0;
+    }
+
+    .tag-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .tag {
+      display: inline-block;
+      padding: 7px 12px;
+      border-radius: 999px;
+      background: rgba(96, 165, 250, 0.12);
+      border: 1px solid rgba(96, 165, 250, 0.35);
+      color: #bfdbfe;
+      font-size: 0.9rem;
+    }
+
+    .tag.alt {
+      background: rgba(52, 211, 153, 0.12);
+      border-color: rgba(52, 211, 153, 0.35);
+      color: #bbf7d0;
+    }
+
+    .flow {
+      display: grid;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .step {
+      background: rgba(31, 41, 55, 0.8);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 14px;
+    }
+
+    .footer {
+      margin-top: 24px;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <section class="hero">
+      <h1>Mini Order Management Microservices Cheat Sheet</h1>
+      <p class="muted">A compact summary of the full learning project: .NET microservices, Docker, Docker Compose, Kubernetes, config, health checks, scaling, and logging.</p>
+      <div class="tag-row">
+        <span class="tag">InventoryService</span>
+        <span class="tag">OrderService</span>
+        <span class="tag">Docker</span>
+        <span class="tag">Kubernetes</span>
+        <span class="tag alt">ConfigMap</span>
+        <span class="tag alt">Secret</span>
+        <span class="tag alt">Health Checks</span>
+        <span class="tag">Structured Logging</span>
+      </div>
+    </section>
+
+    <div class="grid">
+      <section class="card">
+        <h2>What We Built</h2>
+        <ul>
+          <li><strong>InventoryService</strong> with in-memory products and GET endpoints.</li>
+          <li><strong>OrderService</strong> with in-memory orders and POST/GET endpoints.</li>
+          <li><strong>HTTP communication</strong> from OrderService to InventoryService using typed <code>HttpClient</code>.</li>
+          <li><strong>Docker images</strong> for both services.</li>
+          <li><strong>Docker Compose</strong> for local multi-container development.</li>
+          <li><strong>Kubernetes manifests</strong> for Pod, Deployment, Service, ConfigMap, Secret, probes, and scaling.</li>
+        </ul>
+      </section>
+
+      <section class="card">
+        <h2>Core Mental Model</h2>
+        <div class="flow">
+          <div class="step"><strong>Dockerfile</strong> = how to build one container image.</div>
+          <div class="step"><strong>docker-compose.yml</strong> = how to run and connect multiple containers locally.</div>
+          <div class="step"><strong>Pod</strong> = the running unit in Kubernetes.</div>
+          <div class="step"><strong>Deployment</strong> = keeps the desired number of Pods alive.</div>
+          <div class="step"><strong>Service</strong> = stable network name in front of Pods.</div>
+          <div class="step"><strong>ConfigMap / Secret</strong> = runtime configuration injected into Pods.</div>
+        </div>
+      </section>
+    </div>
+
+    <div class="grid">
+      <section class="card">
+        <h2>Request Flow</h2>
+        <p>One create-order request travels like this:</p>
+        <div class="flow">
+          <div class="step">Browser or <code>Invoke-RestMethod</code></div>
+          <div class="step">OrderService endpoint</div>
+          <div class="step">OrderService calls InventoryService through Kubernetes Service DNS</div>
+          <div class="step">InventoryService returns product data</div>
+          <div class="step">OrderService validates stock and creates the order</div>
+          <div class="step">Response goes back to the caller</div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Important URLs</h2>
+        <ul>
+          <li><code>http://localhost:5001/api/inventory</code></li>
+          <li><code>http://localhost:5002/api/orders</code></li>
+          <li><code>http://localhost:5001/health</code></li>
+          <li><code>http://localhost:5002/health</code></li>
+        </ul>
+        <p class="muted">These work when the relevant service is exposed through Docker Compose or <code>kubectl port-forward</code>.</p>
+      </section>
+    </div>
+
+    <div class="grid">
+      <section class="card">
+        <h2>Kubernetes Summary</h2>
+        <ul>
+          <li><strong>Pod</strong>: runs the container.</li>
+          <li><strong>Deployment</strong>: manages replicas and self-healing.</li>
+          <li><strong>Service</strong>: gives stable internal access.</li>
+          <li><strong>ClusterIP</strong>: internal-only service type used for service-to-service calls.</li>
+          <li><strong>port-forward</strong>: temporary way to access the app from your laptop.</li>
+        </ul>
+      </section>
+
+      <section class="card">
+        <h2>Configuration Summary</h2>
+        <ul>
+          <li><strong>ConfigMap</strong>: non-sensitive settings, like <code>InventoryService__BaseUrl</code>.</li>
+          <li><strong>Secret</strong>: sensitive values, injected separately from normal config.</li>
+          <li><strong>envFrom</strong>: loads all keys from a ConfigMap or Secret into environment variables.</li>
+        </ul>
+      </section>
+    </div>
+
+    <div class="grid">
+      <section class="card">
+        <h2>Health Checks</h2>
+        <ul>
+          <li><strong>Readiness</strong>: can this Pod receive traffic?</li>
+          <li><strong>Liveness</strong>: should this container be restarted?</li>
+          <li><code>/health</code> endpoint: simple application health signal.</li>
+        </ul>
+        <pre>readinessProbe:
+  httpGet:
+    path: /health
+    port: 8080
+  initialDelaySeconds: 5
+  periodSeconds: 10</pre>
+      </section>
+
+      <section class="card">
+        <h2>Logging Summary</h2>
+        <ul>
+          <li>Structured logs were added to trace the request path.</li>
+          <li>Logs include product id, quantity, order id, and trace id.</li>
+          <li>Useful for following one request across both services.</li>
+        </ul>
+      </section>
+    </div>
+
+    <section class="card">
+      <h2>Project Outcome</h2>
+      <p>You now have a working learning project that demonstrates the full path from a simple ASP.NET Core API to containerization, multi-service communication, Kubernetes deployment, scaling, config management, probes, and logging.</p>
+      <p class="footer">Created for the Mini Order Management learning path. Last updated: August 28, 2026.</p>
+    </section>
+
+    <section class="card" style="margin-top: 24px;">
+      <h2>How To Run The Project</h2>
+      <p class="muted">This is the practical startup sequence from a fresh machine to a working local and Kubernetes setup.</p>
+
+      <div class="grid" style="margin-top: 12px;">
+        <div class="card">
+          <h3>1. Install the prerequisites</h3>
+          <ul>
+            <li><strong>.NET 10 SDK</strong> - builds and runs the ASP.NET Core services.</li>
+            <li><strong>Docker Desktop</strong> - builds and runs the containers locally.</li>
+            <li><strong>Kubernetes enabled in Docker Desktop</strong> - runs the cluster on your machine.</li>
+            <li><strong>Kubectl</strong> - sends commands to Kubernetes.</li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <h3>2. Open the project folder</h3>
+          <p>Open PowerShell in:</p>
+          <pre>C:\Users\HP\Desktop\Learning Microservices</pre>
+          <p class="muted">Purpose: all commands below assume you are in the project root.</p>
+        </div>
+
+        <div class="card">
+          <h3>3. Build and run locally with .NET</h3>
+          <pre>dotnet build MiniOrderManagement.slnx
+dotnet run --project src/InventoryService
+dotnet run --project src/OrderService</pre>
+          <p class="muted">Purpose: verify the apps compile and run before using containers.</p>
+        </div>
+
+        <div class="card">
+          <h3>4. Test the APIs locally</h3>
+          <pre>Invoke-RestMethod http://localhost:5001/api/inventory
+Invoke-RestMethod http://localhost:5002/api/orders</pre>
+          <p class="muted">Purpose: confirm each API responds from your machine.</p>
+        </div>
+
+        <div class="card">
+          <h3>5. Build the Docker images</h3>
+          <pre>docker build -t mini-orders/inventory-service:step7 -f src/InventoryService/Dockerfile .
+docker build -t mini-orders/order-service:step7 -f src/OrderService/Dockerfile .</pre>
+          <p class="muted">Purpose: package each service into a portable image.</p>
+        </div>
+
+        <div class="card">
+          <h3>6. Run with Docker Compose</h3>
+          <pre>docker compose up --build</pre>
+          <p class="muted">Purpose: start both services together and let them talk through Docker networking.</p>
+        </div>
+
+        <div class="card">
+          <h3>7. Test Docker Compose endpoints</h3>
+          <pre>Invoke-RestMethod http://localhost:5001/api/inventory
+Invoke-RestMethod -Method Post -Uri http://localhost:5002/api/orders -ContentType application/json -Body '{"productId":101,"quantity":2}'</pre>
+          <p class="muted">Purpose: confirm the services can communicate through Compose.</p>
+        </div>
+
+        <div class="card">
+          <h3>8. Enable Kubernetes in Docker Desktop</h3>
+          <ul>
+            <li>Open Docker Desktop.</li>
+            <li>Go to Kubernetes settings.</li>
+            <li>Enable Kubernetes and wait for it to become active.</li>
+          </ul>
+          <p class="muted">Purpose: prepare the local cluster for the Kubernetes steps.</p>
+        </div>
+
+        <div class="card">
+          <h3>9. Apply the Kubernetes manifests</h3>
+          <pre>kubectl apply -f k8s/inventory-deployment.yaml
+kubectl apply -f k8s/inventory-service.yaml
+kubectl apply -f k8s/order-configmap.yaml
+kubectl apply -f k8s/order-secret.yaml
+kubectl apply -f k8s/order-deployment.yaml
+kubectl apply -f k8s/order-service.yaml</pre>
+          <p class="muted">Purpose: create the workloads, Services, and config objects inside the cluster.</p>
+        </div>
+
+        <div class="card">
+          <h3>10. Verify the cluster</h3>
+          <pre>kubectl get deployments,svc,pods
+kubectl rollout status deployment/inventory-deployment
+kubectl rollout status deployment/order-deployment</pre>
+          <p class="muted">Purpose: confirm the cluster is healthy and the Deployments have rolled out.</p>
+        </div>
+
+        <div class="card">
+          <h3>11. Port-forward for browser access</h3>
+          <pre>kubectl port-forward service/inventory-service 5001:8080
+kubectl port-forward service/order-service 5002:8080</pre>
+          <p class="muted">Purpose: expose internal ClusterIP Services to your laptop for local testing.</p>
+        </div>
+
+        <div class="card">
+          <h3>12. Run the final tests</h3>
+          <pre>Invoke-RestMethod http://localhost:5001/health
+Invoke-RestMethod http://localhost:5002/health
+Invoke-RestMethod -Method Post -Uri http://localhost:5002/api/orders -ContentType application/json -Body '{"productId":101,"quantity":2}'</pre>
+          <p class="muted">Purpose: verify health checks, routing, and service-to-service communication.</p>
+        </div>
+      </div>
+
+      <p class="muted" style="margin-top: 14px;">If something fails, check the logs with <code>kubectl logs -f &lt;pod-name&gt;</code> and compare the result with the expected request path.</p>
+    </section>
+
+    <section class="card" style="margin-top: 24px;">
+      <h2>What Each File Does</h2>
+      <p class="muted">This section explains the repository in the order you usually think about it: build one app, connect both apps, then run them in Kubernetes.</p>
+
+      <div class="grid" style="margin-top: 12px;">
+        <div class="card">
+          <h3>Dockerfile in each service</h3>
+          <ul>
+            <li><strong>InventoryService/Dockerfile</strong> builds the Inventory API into one container image.</li>
+            <li><strong>OrderService/Dockerfile</strong> builds the Order API into one container image.</li>
+            <li>Each Dockerfile says how to restore, build, publish, and run one .NET app.</li>
+          </ul>
+          <p class="muted">Purpose: turn one source project into one reusable image.</p>
+        </div>
+
+        <div class="card">
+          <h3>docker-compose.yml</h3>
+          <ul>
+            <li>Starts both containers together on your local machine.</li>
+            <li>Connects the services through Docker networking.</li>
+            <li>Maps local ports like <code>5001</code> and <code>5002</code> to container port <code>8080</code>.</li>
+          </ul>
+          <p class="muted">Purpose: run the whole mini system locally with one command.</p>
+        </div>
+
+        <div class="card">
+          <h3>k8s folder</h3>
+          <ul>
+            <li><strong>inventory-deployment.yaml</strong> = keeps InventoryService Pods running.</li>
+            <li><strong>inventory-service.yaml</strong> = gives InventoryService a stable internal address.</li>
+            <li><strong>order-deployment.yaml</strong> = runs OrderService and injects config, secret, and probes.</li>
+            <li><strong>order-service.yaml</strong> = gives OrderService a stable internal address.</li>
+            <li><strong>order-configmap.yaml</strong> = stores non-sensitive runtime config.</li>
+            <li><strong>order-secret.yaml</strong> = stores a secret value separately from code.</li>
+            <li><strong>inventory-pod.yaml</strong> = the basic single Pod example used earlier for learning.</li>
+          </ul>
+          <p class="muted">Purpose: describe the same app in Kubernetes terms.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="card" style="margin-top: 24px;">
+      <h2>Animated Flow In Words</h2>
+      <p class="muted">Think of the project as a sequence of stages that hand work to the next stage.</p>
+
+      <div class="flow">
+        <div class="step">1. <strong>Source code</strong> exists in each service folder.</div>
+        <div class="step">2. <strong>Dockerfile</strong> turns that source code into a container image.</div>
+        <div class="step">3. <strong>docker-compose.yml</strong> starts both images together and connects them locally.</div>
+        <div class="step">4. <strong>Kubernetes manifests</strong> define the same services for the cluster.</div>
+        <div class="step">5. <strong>ConfigMap and Secret</strong> inject runtime values into the OrderService Pod.</div>
+        <div class="step">6. <strong>Deployment</strong> keeps the right number of Pods alive and replaces failed ones.</div>
+        <div class="step">7. <strong>Service</strong> gives a stable DNS name so OrderService can call InventoryService.</div>
+        <div class="step">8. <strong>Health checks and probes</strong> tell Kubernetes whether the Pods are ready and alive.</div>
+        <div class="step">9. <strong>Logs</strong> show the request path when you send an API call.</div>
+      </div>
+    </section>
+
+    <section class="card" style="margin-top: 24px;">
+      <h2>Flow Diagram</h2>
+      <p class="muted">A simple picture of how the files and runtime pieces connect.</p>
+      <pre>Source Code
+   │
+   ├── Dockerfile (InventoryService) ──► Inventory Image ──► Inventory Container
+   │
+   ├── Dockerfile (OrderService) ───────► Order Image ──────► Order Container
+   │
+   ├── docker-compose.yml ───────────────► Local multi-container run
+   │                                      ├── InventoryService
+   │                                      └── OrderService
+   │
+   └── k8s/*.yaml ───────────────────────► Kubernetes
+                                          ├── ConfigMap / Secret
+                                          ├── Deployment
+                                          ├── Pod
+                                          ├── Service
+                                          └── Health Probes</pre>
+    </section>
+  </div>
+</body>
+</html>

@@ -1,0 +1,44 @@
+# .NET build output
+**/bin/
+**/obj/
+
+# Visual Studio / JetBrains / VS Code local state
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+
+# Local .NET and package caches
+.dotnet-cli/
+.nuget-packages/
+.appdata/
+
+# Node / Angular dependencies and build output
+ui/node_modules/
+ui/dist/
+ui/.angular/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Local logs
+*.log
+
+# Environment files and secrets
+.env
+.env.*
+!.env.example
+k8s/*secret*.yaml
+*.pem
+*.pfx
+*.key
+
+# OS files
+.DS_Store
+Thumbs.db

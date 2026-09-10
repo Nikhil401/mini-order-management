@@ -1,0 +1,43 @@
+@OrderService_HostAddress = http://localhost:5002
+
+POST {{OrderService_HostAddress}}/api/orders
+Content-Type: application/json
+
+{
+  "productId": 101,
+  "quantity": 2
+}
+
+###
+
+# Insufficient inventory: product 101 has 10 units
+POST {{OrderService_HostAddress}}/api/orders
+Content-Type: application/json
+
+{
+  "productId": 101,
+  "quantity": 20
+}
+
+###
+
+# Unknown product
+POST {{OrderService_HostAddress}}/api/orders
+Content-Type: application/json
+
+{
+  "productId": 999,
+  "quantity": 1
+}
+
+###
+
+GET {{OrderService_HostAddress}}/api/orders
+Accept: application/json
+
+###
+
+GET {{OrderService_HostAddress}}/api/orders/1
+Accept: application/json
+
+###

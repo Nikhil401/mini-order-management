@@ -1,0 +1,32 @@
+<div class="layout" [class.dark-theme]="isDarkTheme()">
+  <aside class="sidebar">
+    <div class="sidebar-top">
+      <div class="brand-block">
+      <div class="brand-mark" aria-hidden="true">M</div>
+      <div>
+        <p class="brand">Mini order</p>
+        <h1>Operations</h1>
+      </div>
+      </div>
+      <button class="theme-toggle" type="button" (click)="toggleTheme()" [attr.aria-label]="isDarkTheme() ? 'Switch to light theme' : 'Switch to dark theme'" [attr.aria-pressed]="isDarkTheme()">
+        <span aria-hidden="true">{{ isDarkTheme() ? '☀' : '☾' }}</span>
+      </button>
+    </div>
+
+    <nav aria-label="Main navigation">
+      <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }"><span aria-hidden="true">⌂</span> Dashboard</a>
+      <a routerLink="/orders" routerLinkActive="active"><span aria-hidden="true">▣</span> Orders</a>
+      <a routerLink="/inventory" routerLinkActive="active"><span aria-hidden="true">◈</span> Inventory</a>
+      <a routerLink="/health" routerLinkActive="active"><span aria-hidden="true">♥</span> System health</a>
+    </nav>
+
+    <div class="sidebar-note">
+      <span class="pulse"></span>
+      <div><strong>Services online</strong><small>Live microservice workspace</small></div>
+    </div>
+  </aside>
+
+  <section class="content">
+    <router-outlet />
+  </section>
+</div>

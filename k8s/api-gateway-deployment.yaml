@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-gateway-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: api-gateway
+  template:
+    metadata:
+      labels:
+        app: api-gateway
+    spec:
+      containers:
+        - name: api-gateway
+          image: mini-orders/api-gateway:step7
+          imagePullPolicy: Never
+          env:
+            - name: ReverseProxy__Clusters__order-cluster__Destinations__order-destination__Address
+              value: http://order-service:8080/
+            - name: ReverseProxy__Clusters__inventory-cluster__Destinations__inventory-destination__Address
+              value: http://inventory-service:8080/
+          readinessProbe:
+            httpGet:
+              path: /gateway
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /gateway
+              port: 8080
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP

@@ -1,0 +1,12 @@
+**/bin/
+**/obj/
+.git/
+.vs/
+.vscode/
+.idea/
+.dotnet-cli/
+.appdata/
+.nuget-packages/
+*.user
+*.suo
+*.log
