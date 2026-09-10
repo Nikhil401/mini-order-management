@@ -70,10 +70,12 @@ services:
       - "5001:8080"
       - "5003:8081"
     depends_on:
-      - redis
+      redis:
+        condition: service_started
       rabbitmq:
         condition: service_healthy
-      - sqlserver
+      sqlserver:
+        condition: service_started
 
   order-service:
     image: ${IMAGE_PREFIX:-mini-orders}/order-service:${IMAGE_TAG:-local}
@@ -94,10 +96,12 @@ services:
     ports:
       - "5002:8080"
     depends_on:
-      - inventory-service
+      inventory-service:
+        condition: service_started
       rabbitmq:
         condition: service_healthy
-      - sqlserver
+      sqlserver:
+        condition: service_started
 
 volumes:
   sqlserver-data:
