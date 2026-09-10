@@ -1,0 +1,89 @@
+name: Deploy staging
+
+on:
+  workflow_dispatch:
+    inputs:
+      image_tag:
+        description: 'GHCR image tag to deploy, for example sha-abc1234'
+        required: true
+        default: main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: staging-deployment
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy to staging
+    runs-on: ubuntu-latest
+    environment: staging
+
+    env:
+      STAGING_PATH: /opt/mini-order-management
+      IMAGE_PREFIX: ghcr.io/nikhil401/mini-order-management
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Configure SSH
+        uses: webfactory/ssh-agent@v0.9.1
+        with:
+          ssh-private-key: ${{ secrets.STAGING_SSH_KEY }}
+
+      - name: Trust staging host
+        env:
+          STAGING_KNOWN_HOSTS: ${{ secrets.STAGING_KNOWN_HOSTS }}
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "$STAGING_KNOWN_HOSTS" > ~/.ssh/known_hosts
+
+      - name: Prepare staging environment file
+        env:
+          IMAGE_TAG: ${{ inputs.image_tag }}
+          SQL_PASSWORD: ${{ secrets.SQL_PASSWORD }}
+          RABBITMQ_USERNAME: ${{ secrets.RABBITMQ_USERNAME }}
+          RABBITMQ_PASSWORD: ${{ secrets.RABBITMQ_PASSWORD }}
+          JWT_ISSUER: ${{ secrets.JWT_ISSUER }}
+          JWT_AUDIENCE: ${{ secrets.JWT_AUDIENCE }}
+          JWT_KEY: ${{ secrets.JWT_KEY }}
+        run: |
+          {
+            printf 'IMAGE_PREFIX=%s\n' "$IMAGE_PREFIX"
+            printf 'IMAGE_TAG=%s\n' "$IMAGE_TAG"
+            printf 'SQL_PASSWORD=%s\n' "$SQL_PASSWORD"
+            printf 'RABBITMQ_USERNAME=%s\n' "$RABBITMQ_USERNAME"
+            printf 'RABBITMQ_PASSWORD=%s\n' "$RABBITMQ_PASSWORD"
+            printf 'JWT_ISSUER=%s\n' "$JWT_ISSUER"
+            printf 'JWT_AUDIENCE=%s\n' "$JWT_AUDIENCE"
+            printf 'JWT_KEY=%s\n' "$JWT_KEY"
+          } > .env.staging
+
+      - name: Copy deployment files
+        env:
+          STAGING_HOST: ${{ secrets.STAGING_HOST }}
+          STAGING_USER: ${{ secrets.STAGING_USER }}
+        run: |
+          ssh "$STAGING_USER@$STAGING_HOST" "mkdir -p '$STAGING_PATH'"
+          scp docker-compose.yml .env.staging "$STAGING_USER@$STAGING_HOST:$STAGING_PATH/"
+
+      - name: Log in and deploy Compose stack
+        env:
+          STAGING_HOST: ${{ secrets.STAGING_HOST }}
+          STAGING_USER: ${{ secrets.STAGING_USER }}
+          GHCR_USERNAME: ${{ secrets.GHCR_USERNAME }}
+          GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }}
+        run: |
+          printf '%s' "$GHCR_TOKEN" | ssh "$STAGING_USER@$STAGING_HOST" "docker login ghcr.io --username '$GHCR_USERNAME' --password-stdin"
+          ssh "$STAGING_USER@$STAGING_HOST" "cd '$STAGING_PATH' && docker compose --env-file .env.staging pull && docker compose --env-file .env.staging up -d --remove-orphans"
+
+      - name: Verify staging health
+        env:
+          STAGING_HOST: ${{ secrets.STAGING_HOST }}
+          STAGING_USER: ${{ secrets.STAGING_USER }}
+        run: |
+          ssh "$STAGING_USER@$STAGING_HOST" "curl --fail --silent --show-error http://localhost:5000/orders/health"
+          ssh "$STAGING_USER@$STAGING_HOST" "curl --fail --silent --show-error http://localhost:5000/inventory/health"

@@ -1,6 +1,6 @@
 services:
   api-gateway:
-    image: mini-orders/api-gateway:step7
+    image: ${IMAGE_PREFIX:-mini-orders}/api-gateway:${IMAGE_TAG:-local}
     build:
       context: .
       dockerfile: src/ApiGateway/Dockerfile
@@ -14,7 +14,7 @@ services:
       - inventory-service
 
   ui:
-    image: mini-orders/ui:step8
+    image: ${IMAGE_PREFIX:-mini-orders}/ui:${IMAGE_TAG:-local}
     build:
       context: ./ui
       dockerfile: Dockerfile
@@ -46,7 +46,7 @@ services:
       - sqlserver-data:/var/opt/mssql
 
   inventory-service:
-    image: mini-orders/inventory-service:step7
+    image: ${IMAGE_PREFIX:-mini-orders}/inventory-service:${IMAGE_TAG:-local}
     build:
       context: . 
       dockerfile: src/InventoryService/Dockerfile
@@ -66,7 +66,7 @@ services:
       - sqlserver
 
   order-service:
-    image: mini-orders/order-service:step7
+    image: ${IMAGE_PREFIX:-mini-orders}/order-service:${IMAGE_TAG:-local}
     build:
       context: .
       dockerfile: src/OrderService/Dockerfile
