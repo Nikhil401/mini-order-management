@@ -1,6 +1,7 @@
 # .NET build output
 **/bin/
 **/obj/
+**/TestResults/
 
 # Visual Studio / JetBrains / VS Code local state
 .vs/

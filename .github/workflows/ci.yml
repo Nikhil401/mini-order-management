@@ -28,6 +28,9 @@ jobs:
       - name: Build backend
         run: dotnet build MiniOrderManagement.slnx --configuration Release --no-restore
 
+      - name: Run backend tests
+        run: dotnet test MiniOrderManagement.slnx --configuration Release --no-build --no-restore
+
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:

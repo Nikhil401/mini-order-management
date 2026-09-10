@@ -1,4 +1,8 @@
 <Solution>
+  <Folder Name="/tests/">
+    <Project Path="tests/InventoryService.UnitTests/InventoryService.UnitTests.csproj" />
+    <Project Path="tests/OrderService.UnitTests/OrderService.UnitTests.csproj" />
+  </Folder>
   <Folder Name="/src/">
     <Project Path="src/ApiGateway/ApiGateway.csproj" />
     <Project Path="src/InventoryService/InventoryService.csproj" />
