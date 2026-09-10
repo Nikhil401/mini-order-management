@@ -57,13 +57,29 @@ jobs:
             type=sha,format=short
             type=raw,value=main
 
-      - name: Build and push image
+      - name: Build image for scanning
         uses: docker/build-push-action@v7
         with:
           context: ${{ matrix.context }}
           file: ${{ matrix.file }}
-          push: true
+          load: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+      - name: Scan image for critical vulnerabilities
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: ${{ env.IMAGE_PREFIX }}/${{ matrix.name }}:${{ steps.meta.outputs.version }}
+          format: table
+          exit-code: '1'
+          ignore-unfixed: true
+          vuln-type: os,library
+          severity: CRITICAL
+
+      - name: Push commit image
+        run: docker push ${{ env.IMAGE_PREFIX }}/${{ matrix.name }}:${{ steps.meta.outputs.version }}
+
+      - name: Push main image
+        run: docker push ${{ env.IMAGE_PREFIX }}/${{ matrix.name }}:main
