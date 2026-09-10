@@ -68,6 +68,53 @@ jobs:
           docker compose logs --no-color
           exit 1
 
+      - name: Run order flow smoke test
+        run: |
+          product_id=9999
+
+          curl --fail --silent --show-error \
+            -X POST http://localhost:5000/inventory/stock \
+            -H 'Content-Type: application/json' \
+            -d "{\"productId\":$product_id,\"name\":\"CI Smoke Product\",\"quantity\":10}" \
+            > /tmp/stock-response.json
+
+          initial_quantity=$(curl --fail --silent --show-error \
+            "http://localhost:5000/inventory/$product_id" | jq -r '.quantity')
+
+          if [[ "$initial_quantity" != "10" ]]; then
+            echo "Expected initial quantity 10, got $initial_quantity."
+            exit 1
+          fi
+
+          token=$(curl --fail --silent --show-error \
+            -X POST http://localhost:5000/auth/login \
+            -H 'Content-Type: application/json' \
+            -d '{"username":"admin","password":"admin123"}' | jq -r '.accessToken')
+
+          curl --fail --silent --show-error \
+            -X POST http://localhost:5000/orders \
+            -H 'Content-Type: application/json' \
+            -H "Authorization: Bearer $token" \
+            -d "{\"productId\":$product_id,\"quantity\":1}" \
+            > /tmp/order-response.json
+
+          for attempt in {1..30}; do
+            current_quantity=$(curl --fail --silent --show-error \
+              "http://localhost:5000/inventory/$product_id" | jq -r '.quantity')
+
+            if [[ "$current_quantity" == "9" ]]; then
+              echo "Order flow smoke test passed on attempt $attempt."
+              exit 0
+            fi
+
+            echo "Waiting for asynchronous stock reservation (attempt $attempt/30)."
+            sleep 2
+          done
+
+          echo "Expected quantity 9 after order, got $current_quantity."
+          cat /tmp/order-response.json
+          exit 1
+
       - name: Tear down Compose stack
         if: always()
         run: docker compose down --volumes --remove-orphans
