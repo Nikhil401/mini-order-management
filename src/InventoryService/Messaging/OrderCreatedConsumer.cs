@@ -36,6 +36,29 @@ public class OrderCreatedConsumer : BackgroundService
             Password = _configuration["RabbitMq:Password"] ?? "guest"
         };
 
+        while (!stoppingToken.IsCancellationRequested)
+        {
+            try
+            {
+                await RunConsumerAsync(factory, stoppingToken);
+            }
+            catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+            {
+                break;
+            }
+            catch (Exception exception)
+            {
+                _logger.LogWarning(
+                    exception,
+                    "RabbitMQ consumer could not connect. Retrying in 5 seconds.");
+
+                await Task.Delay(TimeSpan.FromSeconds(5), stoppingToken);
+            }
+        }
+    }
+
+    private async Task RunConsumerAsync(ConnectionFactory factory, CancellationToken stoppingToken)
+    {
         await using var connection = await factory.CreateConnectionAsync(stoppingToken);
         await using var channel = await connection.CreateChannelAsync(cancellationToken: stoppingToken);
 
