@@ -2,6 +2,7 @@ using InventoryService.Data;
 using InventoryService.Models;
 using InventoryService.Services;
 using Microsoft.EntityFrameworkCore;
+using Xunit;
 
 namespace InventoryService.UnitTests;
 

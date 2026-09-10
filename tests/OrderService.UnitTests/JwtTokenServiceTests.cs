@@ -3,6 +3,7 @@ using System.Security.Claims;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using OrderService.Services;
+using Xunit;
 
 namespace OrderService.UnitTests;
 
