@@ -61,12 +61,12 @@ public class InventoryStore(InventoryDbContext dbContext) : IInventoryStore
         var item = await dbContext.InventoryItems
             .FirstOrDefaultAsync(existing => existing.ProductId == productId, cancellationToken);
 
-        if (item is null)
+        if (item is null || item.Quantity < quantity)
         {
             return false;
         }
 
-        item.Quantity = Math.Max(0, item.Quantity - quantity);
+        item.Quantity -= quantity;
         await dbContext.SaveChangesAsync(cancellationToken);
         return true;
     }

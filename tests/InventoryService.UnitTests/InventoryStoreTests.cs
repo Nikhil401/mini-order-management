@@ -42,6 +42,29 @@ public class InventoryStoreTests
         Assert.False(result);
     }
 
+    [Fact]
+    public async Task ReserveStockAsync_ReturnsFalseWhenQuantityIsInsufficient()
+    {
+        await using var dbContext = CreateContext();
+        dbContext.InventoryItems.Add(new InventoryItem
+        {
+            ProductId = 2,
+            Name = "Monitor",
+            Quantity = 2
+        });
+        await dbContext.SaveChangesAsync();
+
+        var store = new InventoryStore(dbContext);
+
+        var result = await store.ReserveStockAsync(2, 3);
+
+        Assert.False(result);
+        Assert.Equal(2, await dbContext.InventoryItems
+            .Where(item => item.ProductId == 2)
+            .Select(item => item.Quantity)
+            .SingleAsync());
+    }
+
     private static InventoryDbContext CreateContext()
     {
         var options = new DbContextOptionsBuilder<InventoryDbContext>()
