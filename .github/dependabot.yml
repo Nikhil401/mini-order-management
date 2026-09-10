@@ -1,0 +1,36 @@
+version: 2
+updates:
+  - package-ecosystem: nuget
+    directory: /src/ApiGateway
+    schedule:
+      interval: monthly
+
+  - package-ecosystem: nuget
+    directory: /src/InventoryService
+    schedule:
+      interval: monthly
+
+  - package-ecosystem: nuget
+    directory: /src/OrderService
+    schedule:
+      interval: monthly
+
+  - package-ecosystem: nuget
+    directory: /tests/InventoryService.UnitTests
+    schedule:
+      interval: monthly
+
+  - package-ecosystem: nuget
+    directory: /tests/OrderService.UnitTests
+    schedule:
+      interval: monthly
+
+  - package-ecosystem: npm
+    directory: /ui
+    schedule:
+      interval: monthly
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
