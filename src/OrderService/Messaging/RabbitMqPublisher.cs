@@ -10,6 +10,10 @@ public class RabbitMqPublisher : IRabbitMqPublisher, IDisposable
 {
     private const string ExchangeName = "orders.exchange";
     private const string RoutingKey = "order.created";
+    private const string QueueName = "inventory.order-created";
+    private const string DeadLetterExchangeName = "orders.dead-letter.exchange";
+    private const string DeadLetterQueueName = "inventory.order-created.dead-letter";
+    private const string DeadLetterRoutingKey = "order.created.failed";
     private readonly IConnection _connection;
     private readonly IChannel _channel;
     private readonly ILogger<RabbitMqPublisher> _logger;
@@ -27,7 +31,37 @@ public class RabbitMqPublisher : IRabbitMqPublisher, IDisposable
 
         _connection = factory.CreateConnectionAsync(cancellationToken: default).GetAwaiter().GetResult();
         _channel = _connection.CreateChannelAsync(cancellationToken: default).GetAwaiter().GetResult();
-        _channel.ExchangeDeclareAsync(ExchangeName, ExchangeType.Direct, durable: true).GetAwaiter().GetResult();
+        DeclareTopologyAsync(_channel).GetAwaiter().GetResult();
+    }
+
+    private static async Task DeclareTopologyAsync(IChannel channel)
+    {
+        await channel.ExchangeDeclareAsync(ExchangeName, ExchangeType.Direct, durable: true);
+        await channel.ExchangeDeclareAsync(DeadLetterExchangeName, ExchangeType.Direct, durable: true);
+        await channel.QueueDeclareAsync(
+            DeadLetterQueueName,
+            durable: true,
+            exclusive: false,
+            autoDelete: false,
+            arguments: null);
+        await channel.QueueBindAsync(
+            DeadLetterQueueName,
+            DeadLetterExchangeName,
+            DeadLetterRoutingKey);
+
+        var queueArguments = new Dictionary<string, object?>
+        {
+            ["x-dead-letter-exchange"] = DeadLetterExchangeName,
+            ["x-dead-letter-routing-key"] = DeadLetterRoutingKey
+        };
+
+        await channel.QueueDeclareAsync(
+            QueueName,
+            durable: true,
+            exclusive: false,
+            autoDelete: false,
+            arguments: queueArguments);
+        await channel.QueueBindAsync(QueueName, ExchangeName, RoutingKey);
     }
 
     public Task PublishOrderCreatedAsync(OrderCreatedEvent message, CancellationToken cancellationToken = default)
